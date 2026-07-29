@@ -28,7 +28,7 @@ async def create(
     body: ConversationCreate,
     user_id: uuid.UUID = Depends(get_current_user_id),
     svc: ConversationService = Depends(_conversation_service),
-):
+) -> ConversationResponse:
     return await svc.create(user_id, body.title)
 
 
@@ -36,7 +36,7 @@ async def create(
 async def list_conversations(
     user_id: uuid.UUID = Depends(get_current_user_id),
     svc: ConversationService = Depends(_conversation_service),
-):
+) -> ConversationList:
     return await svc.list_for_user(user_id)
 
 
@@ -46,7 +46,7 @@ async def rename(
     body: ConversationUpdate,
     user_id: uuid.UUID = Depends(get_current_user_id),
     svc: ConversationService = Depends(_conversation_service),
-):
+) -> ConversationResponse:
     return await svc.rename(user_id, conversation_id, body.title)
 
 
@@ -55,7 +55,7 @@ async def delete(
     conversation_id: uuid.UUID,
     user_id: uuid.UUID = Depends(get_current_user_id),
     svc: ConversationService = Depends(_conversation_service),
-):
+) -> None:
     await svc.delete(user_id, conversation_id)
 
 
@@ -72,7 +72,7 @@ async def history(
     offset: int = Query(default=0, ge=0),
     user_id: uuid.UUID = Depends(get_current_user_id),
     chat_svc: ChatService = Depends(_chat_history_service),
-):
+) -> MessageHistory:
     if not await chat_svc.verify_conversation_access(user_id, conversation_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found")
     messages, total, has_more = await chat_svc.get_history(conversation_id, limit, offset)

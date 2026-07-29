@@ -42,18 +42,18 @@ async def get_current_user_id(
 
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
-async def signup(request: Request, body: SignupRequest, svc: AuthService = Depends(get_auth_service)):  # noqa: ARG001
+async def signup(request: Request, body: SignupRequest, svc: AuthService = Depends(get_auth_service)) -> TokenResponse:  # noqa: ARG001
     return await svc.signup(body.email, body.password)
 
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("10/minute")
-async def login(request: Request, body: LoginRequest, svc: AuthService = Depends(get_auth_service)):  # noqa: ARG001
+async def login(request: Request, body: LoginRequest, svc: AuthService = Depends(get_auth_service)) -> TokenResponse:  # noqa: ARG001
     return await svc.login(body.email, body.password)
 
 
 @router.post("/refresh", response_model=TokenResponse)
-async def refresh(body: RefreshRequest, svc: AuthService = Depends(get_auth_service)):
+async def refresh(body: RefreshRequest, svc: AuthService = Depends(get_auth_service)) -> TokenResponse:
     return await svc.refresh(body.refresh_token)
 
 
@@ -61,5 +61,5 @@ async def refresh(body: RefreshRequest, svc: AuthService = Depends(get_auth_serv
 async def me(
     user_id: uuid.UUID = Depends(get_current_user_id),
     svc: AuthService = Depends(get_auth_service),
-):
+) -> UserResponse:
     return await svc.get_profile(user_id)

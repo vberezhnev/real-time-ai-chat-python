@@ -1,6 +1,7 @@
 import uuid
 
 from app.core.uow import UnitOfWork
+from app.models.conversation import Conversation
 from app.schemas.conversation import ConversationList, ConversationResponse
 
 
@@ -17,7 +18,7 @@ class ConversationService:
         items = await self._uow.conversations.list_by_user(user_id)
         return ConversationList(items=[ConversationResponse.model_validate(c) for c in items])
 
-    async def _get_owned_or_404(self, user_id: uuid.UUID, conversation_id: uuid.UUID):
+    async def _get_owned_or_404(self, user_id: uuid.UUID, conversation_id: uuid.UUID) -> Conversation:
         from fastapi import HTTPException, status
         conv = await self._uow.conversations.get_by_id(conversation_id)
         if conv is None or conv.user_id != user_id:

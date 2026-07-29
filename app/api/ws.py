@@ -31,7 +31,7 @@ def _ws_user_id(token: str) -> uuid.UUID | None:
     return uuid.UUID(payload["sub"])
 
 
-async def _send_json(ws: WebSocket, data: dict) -> None:
+async def _send_json(ws: WebSocket, data: dict[str, object]) -> None:
     with contextlib.suppress(Exception):
         await ws.send_json(data)
 
@@ -54,7 +54,7 @@ async def _listen_redis(ws: WebSocket, conversation_id: str, redis: Redis) -> No
         pass
     finally:
         await pubsub.unsubscribe(REDIS_CHANNEL)
-        await pubsub.aclose()
+        await pubsub.aclose()  # type: ignore[no-untyped-call]
 
 
 async def close_all_ws_connections() -> None:
@@ -69,7 +69,7 @@ async def close_all_ws_connections() -> None:
 
 
 @router.websocket("/ws/{conversation_id}")
-async def websocket_endpoint(ws: WebSocket, conversation_id: str):
+async def websocket_endpoint(ws: WebSocket, conversation_id: str) -> None:
     token = ws.query_params.get("token", "")
     user_id = _ws_user_id(token)
     if user_id is None:

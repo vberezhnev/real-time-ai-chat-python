@@ -1,8 +1,10 @@
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -27,7 +29,7 @@ logger = structlog.get_logger("app")
 
 
 @asynccontextmanager
-async def lifespan(_app: FastAPI):
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     redis = await get_redis()
     await redis.ping()
     yield
@@ -45,7 +47,7 @@ limiter = Limiter(
 
 app = FastAPI(title="Real-Time AI Chat", version="0.1.0", lifespan=lifespan)
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 if settings.is_prod:
     app.add_middleware(
@@ -69,7 +71,7 @@ app.add_middleware(MetricsMiddleware)
 
 
 @app.middleware("http")
-async def logging_middleware(request: Request, call_next):
+async def logging_middleware(request: Request, call_next: Any) -> Response:
     clear_contextvars()
     bind_contextvars(
         request_id=request.headers.get("X-Request-ID", ""),
@@ -78,7 +80,7 @@ async def logging_middleware(request: Request, call_next):
     )
     response = await call_next(request)
     bind_contextvars(status=response.status_code)
-    return response
+    return response  # type: ignore[no-any-return]
 
 
 app.include_router(auth_router)
@@ -87,13 +89,13 @@ app.include_router(ws_router)
 
 
 @app.exception_handler(Exception)
-async def global_exception_handler(_request: Request, exc: Exception):
+async def global_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
     logger.error("unhandled_exception", error=str(exc), exc_info=True)
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
 @app.get("/health")
-async def health():
+async def health() -> JSONResponse:
     db_ok = False
     redis_ok = False
     try:

@@ -4,7 +4,7 @@ from app.config import settings
 
 
 def setup_logging() -> None:
-    shared_processors = [
+    shared_processors: list[object] = [
         structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_logger_name,
         structlog.stdlib.add_log_level,
@@ -21,7 +21,7 @@ def setup_logging() -> None:
         processors = shared_processors + [structlog.dev.ConsoleRenderer()]
 
     structlog.configure(
-        processors=processors,
+        processors=processors,  # type: ignore[arg-type]
         wrapper_class=structlog.stdlib.BoundLogger,
         context_class=dict,
         logger_factory=structlog.PrintLoggerFactory(),

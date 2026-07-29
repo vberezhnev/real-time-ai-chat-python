@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from typing import Any
 
 from redis.asyncio import Redis
 
@@ -85,7 +86,7 @@ class ChatService:
             await self._redis.publish(REDIS_CHANNEL, out.model_dump_json())
             await uow.commit()
 
-    async def get_history(self, conversation_id: uuid.UUID, limit: int, offset: int):
+    async def get_history(self, conversation_id: uuid.UUID, limit: int, offset: int) -> tuple[list[Any], int, bool]:
         messages, total = await self._uow.messages.list_by_conversation(conversation_id, limit, offset)
         has_more = len(messages) > limit
         if has_more:
