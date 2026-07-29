@@ -10,7 +10,8 @@ from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from app.api.auth import router as auth_router
 from app.api.conversations import router as conversations_router
-from app.api.ws import router as ws_router, close_all_ws_connections
+from app.api.ws import close_all_ws_connections
+from app.api.ws import router as ws_router
 from app.config import settings
 from app.core.logging import setup_logging
 from app.core.metrics import MetricsMiddleware
@@ -21,11 +22,12 @@ from app.db.session import dispose_engine, get_session_factory
 setup_logging()
 
 import structlog  # noqa: E402
+
 logger = structlog.get_logger("app")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     redis = await get_redis()
     await redis.ping()
     yield
@@ -85,7 +87,7 @@ app.include_router(ws_router)
 
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
+async def global_exception_handler(_request: Request, exc: Exception):
     logger.error("unhandled_exception", error=str(exc), exc_info=True)
     return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 

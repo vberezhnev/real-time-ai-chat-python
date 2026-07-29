@@ -1,6 +1,5 @@
 import asyncio
 
-from app.config import settings
 from app.core.interfaces import AIService
 
 
@@ -16,9 +15,5 @@ _ai_instance: AIService | None = None
 def get_ai_service() -> AIService:
     global _ai_instance
     if _ai_instance is None:
-        provider = settings.ai_provider
-        if provider == "mock":
-            _ai_instance = MockAIService()
-        else:
-            _ai_instance = MockAIService()
+        _ai_instance = MockAIService()
     return _ai_instance

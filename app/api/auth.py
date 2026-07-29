@@ -42,13 +42,13 @@ async def get_current_user_id(
 
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit("5/minute")
-async def signup(_request: Request, body: SignupRequest, svc: AuthService = Depends(get_auth_service)):
+async def signup(request: Request, body: SignupRequest, svc: AuthService = Depends(get_auth_service)):  # noqa: ARG001
     return await svc.signup(body.email, body.password)
 
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("10/minute")
-async def login(_request: Request, body: LoginRequest, svc: AuthService = Depends(get_auth_service)):
+async def login(request: Request, body: LoginRequest, svc: AuthService = Depends(get_auth_service)):  # noqa: ARG001
     return await svc.login(body.email, body.password)
 
 

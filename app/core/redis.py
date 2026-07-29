@@ -1,10 +1,10 @@
-from typing import Optional
 
-from redis.asyncio import Redis as AsyncRedis, from_url
+from redis.asyncio import Redis as AsyncRedis
+from redis.asyncio import from_url
 
 from app.config import settings
 
-redis_client: Optional[AsyncRedis] = None
+redis_client: AsyncRedis | None = None
 
 
 async def get_redis() -> AsyncRedis:

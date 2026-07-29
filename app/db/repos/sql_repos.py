@@ -1,7 +1,7 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.conversation import Conversation
@@ -64,7 +64,7 @@ class SQLConversationRepository:
         if conv is None:
             return None
         conv.title = title
-        conv.updated_at = datetime.now(timezone.utc)
+        conv.updated_at = datetime.now(UTC)
         await self._session.flush()
         await self._session.refresh(conv)
         return conv
@@ -74,7 +74,7 @@ class SQLConversationRepository:
         if conv is None:
             return False
         conv.is_deleted = True
-        conv.updated_at = datetime.now(timezone.utc)
+        conv.updated_at = datetime.now(UTC)
         await self._session.flush()
         return True
 

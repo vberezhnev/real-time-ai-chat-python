@@ -1,5 +1,4 @@
 import uuid
-
 from typing import Protocol
 
 from app.models.conversation import Conversation

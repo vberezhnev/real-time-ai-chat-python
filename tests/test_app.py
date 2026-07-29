@@ -123,29 +123,31 @@ class TestMessages:
 
         from httpx_ws.transport import ASGIWebSocketTransport
         ws_url = f"http://test/ws/{cid}?token={auth_token}"
-        async with httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac:
-            async with aconnect_ws(ws_url, client=ac) as ws:
-                await ws.send_json({"type": "message", "content": "Hello AI"})
-                resp = await ws.receive_json()
-                assert resp["type"] == "message"
-                assert resp["role"] == "user"
-                assert resp["content"] == "Hello AI"
-                ai_resp = await ws.receive_json()
-                assert ai_resp["type"] == "message"
-                assert ai_resp["role"] == "assistant"
+        async with (
+            httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac,
+            aconnect_ws(ws_url, client=ac) as ws,
+        ):
+            await ws.send_json({"type": "message", "content": "Hello AI"})
+            resp = await ws.receive_json()
+            assert resp["type"] == "message"
+            assert resp["role"] == "user"
+            assert resp["content"] == "Hello AI"
+            ai_resp = await ws.receive_json()
+            assert ai_resp["type"] == "message"
+            assert ai_resp["role"] == "assistant"
 
         hist = await client.get(f"/conversations/{cid}/messages", headers=auth_headers)
         assert hist.status_code == 200
         items = hist.json()["items"]
         assert len(items) >= 2
 
-    async def test_ws_rejects_no_token(self, client: AsyncClient):
+    async def test_ws_rejects_no_token(self, client: AsyncClient):  # noqa: ARG002
         from httpx_ws.transport import ASGIWebSocketTransport
         async with httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac:
             try:
                 async with aconnect_ws("http://test/ws/some-id", client=ac) as ws:
                     await ws.receive_json()
-                    assert False, "Expected exception"
+                    raise AssertionError("Expected exception")
             except Exception:
                 pass
 
@@ -155,12 +157,14 @@ class TestMessages:
 
         from httpx_ws.transport import ASGIWebSocketTransport
         ws_url = f"http://test/ws/{cid}?token={auth_token}"
-        async with httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac:
-            async with aconnect_ws(ws_url, client=ac) as ws:
-                for i in range(5):
-                    await ws.send_json({"type": "message", "content": f"Msg {i}"})
-                    await ws.receive_json()
-                    await ws.receive_json()
+        async with (
+            httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac,
+            aconnect_ws(ws_url, client=ac) as ws,
+        ):
+            for i in range(5):
+                await ws.send_json({"type": "message", "content": f"Msg {i}"})
+                await ws.receive_json()
+                await ws.receive_json()
 
         hist = await client.get(f"/conversations/{cid}/messages?limit=2&offset=0", headers=auth_headers)
         assert hist.status_code == 200
@@ -174,34 +178,36 @@ class TestMessages:
         cid = conv.json()["id"]
         from httpx_ws.transport import ASGIWebSocketTransport
         ws_url = f"http://test/ws/{cid}?token={auth_token}"
-        async with httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac:
-            async with aconnect_ws(ws_url, client=ac) as ws:
-                for i in range(3):
-                    await ws.send_json({"type": "message", "content": f"N{i}"})
-                    await ws.receive_json()
-                    await ws.receive_json()
+        async with (
+            httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac,
+            aconnect_ws(ws_url, client=ac) as ws,
+        ):
+            for i in range(3):
+                await ws.send_json({"type": "message", "content": f"N{i}"})
+                await ws.receive_json()
+                await ws.receive_json()
         hist = await client.get(f"/conversations/{cid}/messages?limit=10&offset=0", headers=auth_headers)
         assert hist.status_code == 200
         data = hist.json()
         assert data["total"] == 6
 
-    async def test_ws_rejects_bad_token(self, client: AsyncClient):
+    async def test_ws_rejects_bad_token(self, client: AsyncClient):  # noqa: ARG002
         from httpx_ws.transport import ASGIWebSocketTransport
         async with httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac:
             try:
                 async with aconnect_ws("http://test/ws/some-id?token=invalidtoken", client=ac) as ws:
                     await ws.receive_json()
-                    assert False, "Expected exception"
+                    raise AssertionError("Expected exception")
             except Exception:
                 pass
 
-    async def test_ws_rejects_wrong_conversation(self, client: AsyncClient, auth_token):
+    async def test_ws_rejects_wrong_conversation(self, client: AsyncClient, auth_token):  # noqa: ARG002
         from httpx_ws.transport import ASGIWebSocketTransport
         async with httpx.AsyncClient(transport=ASGIWebSocketTransport(app)) as ac:
             try:
                 async with aconnect_ws(f"http://test/ws/{uuid.uuid4()}?token={auth_token}", client=ac) as ws:
                     await ws.receive_json()
-                    assert False, "Expected exception"
+                    raise AssertionError("Expected exception")
             except Exception:
                 pass
 
@@ -210,14 +216,14 @@ class TestCrossInstanceFanOut:
     async def test_redis_pub_sub_works(self):
         from app.core.redis import get_redis
         redis = await get_redis()
-        CH = "test:channel"
+        ch = "test:channel"
         pubsub = redis.pubsub()
-        await pubsub.subscribe(CH)
+        await pubsub.subscribe(ch)
         await pubsub.get_message(timeout=2)
-        await redis.publish(CH, "hello")
+        await redis.publish(ch, "hello")
         msg = await pubsub.get_message(timeout=2)
         assert msg is not None
         assert msg["type"] == "message"
         assert msg["data"] == "hello"
-        await pubsub.unsubscribe(CH)
+        await pubsub.unsubscribe(ch)
         await pubsub.aclose()

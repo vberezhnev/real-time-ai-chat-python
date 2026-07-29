@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import json
 import uuid
 
@@ -12,8 +13,8 @@ from app.core.security import decode_token
 from app.core.uow import UnitOfWork
 from app.db.repos.sql_repos import SQLConversationRepository
 from app.db.session import get_session_factory
-from app.schemas.message import WSMessageIn, WSError
-from app.services.chat_service import ChatService, REDIS_CHANNEL
+from app.schemas.message import WSError, WSMessageIn
+from app.services.chat_service import REDIS_CHANNEL, ChatService
 
 router = APIRouter()
 
@@ -31,10 +32,8 @@ def _ws_user_id(token: str) -> uuid.UUID | None:
 
 
 async def _send_json(ws: WebSocket, data: dict) -> None:
-    try:
+    with contextlib.suppress(Exception):
         await ws.send_json(data)
-    except Exception:
-        pass
 
 
 async def _listen_redis(ws: WebSocket, conversation_id: str, redis: Redis) -> None:
@@ -63,10 +62,8 @@ async def close_all_ws_connections() -> None:
     logger = structlog.get_logger("chat.ws")
     for key, clients in list(_connected_clients.items()):
         for ws in list(clients):
-            try:
+            with contextlib.suppress(Exception):
                 await ws.close(code=status.WS_1001_GOING_AWAY, reason="Server shutting down")
-            except Exception:
-                pass
         del _connected_clients[key]
     logger.info("all_ws_connections_closed", count=len(_connected_clients))
 
@@ -107,7 +104,7 @@ async def websocket_endpoint(ws: WebSocket, conversation_id: str):
             while True:
                 try:
                     raw = await asyncio.wait_for(ws.receive_text(), timeout=_WS_IDLE_TIMEOUT)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     await ws.close(code=status.WS_1001_GOING_AWAY, reason="Idle timeout")
                     break
 
@@ -135,10 +132,8 @@ async def websocket_endpoint(ws: WebSocket, conversation_id: str):
             logger.error("ws_error", error=str(e))
         finally:
             redis_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await redis_task
-            except asyncio.CancelledError:
-                pass
             _connected_clients[key].discard(ws)
             if not _connected_clients[key]:
                 del _connected_clients[key]
