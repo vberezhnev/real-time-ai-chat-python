@@ -2,7 +2,7 @@
 from redis.asyncio import Redis as AsyncRedis
 from redis.asyncio import from_url
 
-from app.config import settings
+from app.infrastructure.config import settings
 
 redis_client: AsyncRedis | None = None
 

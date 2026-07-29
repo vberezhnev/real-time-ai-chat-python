@@ -2,10 +2,12 @@ import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.auth import get_current_user_id
-from app.core.ai import get_ai_service
-from app.core.uow import UnitOfWork
-from app.db.session import get_uow
+from app.application.services.chat_service import ChatService
+from app.application.services.conversation_service import ConversationService
+from app.application.uow import UnitOfWork
+from app.infrastructure.ai.service import get_ai_service
+from app.infrastructure.db.session import get_uow
+from app.infrastructure.web.api.auth import get_current_user_id
 from app.schemas.conversation import (
     ConversationCreate,
     ConversationList,
@@ -13,8 +15,6 @@ from app.schemas.conversation import (
     ConversationUpdate,
 )
 from app.schemas.message import MessageHistory, MessageResponse
-from app.services.chat_service import ChatService
-from app.services.conversation_service import ConversationService
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
@@ -60,7 +60,7 @@ async def delete(
 
 
 async def _chat_history_service(uow: UnitOfWork = Depends(get_uow)) -> ChatService:
-    from app.core.redis import get_redis
+    from app.infrastructure.cache.redis import get_redis
     redis = await get_redis()
     return ChatService(uow=uow, ai_service=get_ai_service(), redis=redis)
 

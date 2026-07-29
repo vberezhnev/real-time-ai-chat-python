@@ -5,8 +5,8 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from app.db.base import Base
-from app.models import User, Conversation, Message  # noqa: F401
+from app.infrastructure.db.base import Base
+from app.infrastructure.db.models import User, Conversation, Message  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

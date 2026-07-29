@@ -10,16 +10,16 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from structlog.contextvars import bind_contextvars, clear_contextvars
 
-from app.api.auth import router as auth_router
-from app.api.conversations import router as conversations_router
-from app.api.ws import close_all_ws_connections
-from app.api.ws import router as ws_router
-from app.config import settings
-from app.core.logging import setup_logging
-from app.core.metrics import MetricsMiddleware
-from app.core.redis import close_redis, get_redis
-from app.core.security_headers import SecurityHeadersMiddleware
-from app.db.session import dispose_engine, get_session_factory
+from app.infrastructure.cache.redis import close_redis, get_redis
+from app.infrastructure.config import settings
+from app.infrastructure.db.session import dispose_engine, get_session_factory
+from app.infrastructure.logging import setup_logging
+from app.infrastructure.web.api.auth import router as auth_router
+from app.infrastructure.web.api.conversations import router as conversations_router
+from app.infrastructure.web.api.ws import close_all_ws_connections
+from app.infrastructure.web.api.ws import router as ws_router
+from app.infrastructure.web.middleware.metrics import MetricsMiddleware
+from app.infrastructure.web.middleware.security_headers import SecurityHeadersMiddleware
 
 setup_logging()
 

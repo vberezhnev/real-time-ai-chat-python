@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from app.config import settings
-from app.core.uow import UnitOfWork
+from app.application.uow import UnitOfWork
+from app.infrastructure.config import settings
 
 _engine: AsyncEngine | None = None
 _async_session_factory: async_sessionmaker[AsyncSession] | None = None

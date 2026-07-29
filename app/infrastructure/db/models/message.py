@@ -8,11 +8,11 @@ from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base
+from app.infrastructure.db.base import Base
 
 if TYPE_CHECKING:
-    from app.models.conversation import Conversation
-    from app.models.user import User
+    from app.infrastructure.db.models.conversation import Conversation
+    from app.infrastructure.db.models.user import User
 
 
 class Message(Base):

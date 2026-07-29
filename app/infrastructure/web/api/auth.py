@@ -5,10 +5,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from app.config import settings
-from app.core.security import decode_token
-from app.core.uow import UnitOfWork
-from app.db.session import get_uow
+from app.application.services.auth_service import AuthService
+from app.application.uow import UnitOfWork
+from app.infrastructure.config import settings
+from app.infrastructure.db.session import get_uow
+from app.infrastructure.security import decode_token
 from app.schemas.auth import (
     LoginRequest,
     RefreshRequest,
@@ -16,7 +17,6 @@ from app.schemas.auth import (
     TokenResponse,
     UserResponse,
 )
-from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 bearer_scheme = HTTPBearer(auto_error=False)

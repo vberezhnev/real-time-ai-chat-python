@@ -6,15 +6,15 @@ import uuid
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 from redis.asyncio import Redis
 
-from app.core.ai import get_ai_service
-from app.core.metrics import active_ws_connections
-from app.core.redis import get_redis
-from app.core.security import decode_token
-from app.core.uow import UnitOfWork
-from app.db.repos.sql_repos import SQLConversationRepository
-from app.db.session import get_session_factory
+from app.application.services.chat_service import REDIS_CHANNEL, ChatService
+from app.application.uow import UnitOfWork
+from app.infrastructure.ai.service import get_ai_service
+from app.infrastructure.cache.redis import get_redis
+from app.infrastructure.db.repos.sql_repos import SQLConversationRepository
+from app.infrastructure.db.session import get_session_factory
+from app.infrastructure.security import decode_token
+from app.infrastructure.web.middleware.metrics import active_ws_connections
 from app.schemas.message import WSError, WSMessageIn
-from app.services.chat_service import REDIS_CHANNEL, ChatService
 
 router = APIRouter()
 

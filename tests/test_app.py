@@ -7,8 +7,8 @@ from httpx_ws import aconnect_ws
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from app.db.base import Base
-from app.main import app
+from app.infrastructure.db.base import Base
+from app.infrastructure.web.main import app
 
 TEST_DB_URL = "postgresql+asyncpg://chat:chatpass@localhost:5433/chatchat_test"
 
@@ -214,7 +214,7 @@ class TestMessages:
 
 class TestCrossInstanceFanOut:
     async def test_redis_pub_sub_works(self):
-        from app.core.redis import get_redis
+        from app.infrastructure.cache.redis import get_redis
         redis = await get_redis()
         ch = "test:channel"
         pubsub = redis.pubsub()

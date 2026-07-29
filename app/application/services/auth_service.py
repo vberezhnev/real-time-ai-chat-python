@@ -1,12 +1,12 @@
 import uuid
 
-from app.core.security import (
+from app.application.uow import UnitOfWork
+from app.infrastructure.security import (
     create_access_token,
     create_refresh_token,
     hash_password,
     verify_password,
 )
-from app.core.uow import UnitOfWork
 from app.schemas.auth import TokenResponse, UserResponse
 
 
@@ -37,7 +37,7 @@ class AuthService:
         )
 
     async def refresh(self, refresh_token: str) -> TokenResponse:
-        from app.core.security import decode_token
+        from app.infrastructure.security import decode_token
         payload = decode_token(refresh_token)
         if payload is None or payload.get("type") != "refresh":
             from fastapi import HTTPException, status

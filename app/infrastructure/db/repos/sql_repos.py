@@ -4,9 +4,9 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.conversation import Conversation
-from app.models.message import Message
-from app.models.user import User
+from app.infrastructure.db.models.conversation import Conversation
+from app.infrastructure.db.models.message import Message
+from app.infrastructure.db.models.user import User
 
 
 class SQLUserRepository:

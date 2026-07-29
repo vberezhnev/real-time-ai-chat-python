@@ -5,7 +5,7 @@ from typing import Any
 import bcrypt
 import jwt
 
-from app.config import settings
+from app.infrastructure.config import settings
 
 
 def hash_password(password: str) -> str:

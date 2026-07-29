@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.repos.sql_repos import (
+from app.infrastructure.db.repos.sql_repos import (
     SQLConversationRepository,
     SQLMessageRepository,
     SQLUserRepository,

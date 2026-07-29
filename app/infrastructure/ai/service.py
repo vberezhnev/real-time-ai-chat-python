@@ -1,6 +1,6 @@
 import asyncio
 
-from app.core.interfaces import AIService
+from app.domain.ports import AIService
 
 
 class MockAIService:

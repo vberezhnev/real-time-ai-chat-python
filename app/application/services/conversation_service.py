@@ -1,7 +1,7 @@
 import uuid
 
-from app.core.uow import UnitOfWork
-from app.models.conversation import Conversation
+from app.application.uow import UnitOfWork
+from app.infrastructure.db.models.conversation import Conversation
 from app.schemas.conversation import ConversationList, ConversationResponse
 
 

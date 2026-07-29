@@ -4,8 +4,8 @@ from typing import Any
 
 from redis.asyncio import Redis
 
-from app.core.interfaces import AIService
-from app.core.uow import UnitOfWork
+from app.application.uow import UnitOfWork
+from app.domain.ports import AIService
 from app.schemas.message import WSMessageOut
 
 
@@ -62,8 +62,8 @@ class ChatService:
         conversation_id: uuid.UUID,
         user_message: str,
     ) -> None:
-        from app.core.uow import UnitOfWork as UoW
-        from app.db.session import get_session_factory
+        from app.application.uow import UnitOfWork as UoW
+        from app.infrastructure.db.session import get_session_factory
 
         factory = get_session_factory()
         async with factory() as session:
